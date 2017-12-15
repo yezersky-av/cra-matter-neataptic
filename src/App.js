@@ -22,6 +22,7 @@ class App extends Component {
         //     this.ctx.fillRect(0, 0, this.props.width, this.props.height);
         // }
         this.matter = matter(this.props.width, this.props.height);
+        console.log('matter: ', this.matter);
     }
 
     render() {
