@@ -16,6 +16,137 @@ import {
     Vector
 } from 'matter-js';
 
+export default class Simulation {
+    constructor(width, height) {
+        this.engine = Engine.create();
+        this.world = this.engine.world;
+        this.world.gravity = {x: 0, y: 0};
+
+        // create renderer
+        this.render = Render.create({
+            element: document.body,
+            engine: this.engine,
+            options: {
+                width: width,
+                height: height,
+                showAngleIndicator: true
+            }
+        });
+        Render.run(this.render);
+
+        // create runner
+        this.runner = Runner.create();
+        Runner.run(this.runner, this.engine);
+
+        // add bodies
+        let stack = Composites.stack(20, 20, 9, 6, 75, 75, function (x, y) {
+            const swing = 100;
+            switch (Math.round(Common.random(0, 1))) {
+
+                case 0:
+                    if (Common.random() < 0.8) {
+                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(20, 50), Common.random(20, 50), {isStatic: true});
+                    } else {
+                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(80, 120), Common.random(20, 30), {isStatic: true});
+                    }
+                case 1:
+                    let sides = Math.round(Common.random(1, 8));
+                    sides = (sides === 3) ? 4 : sides;
+                    return Bodies.polygon(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), sides, Common.random(20, 50), {isStatic: true});
+
+                default:
+                    break;
+            }
+        });
+
+        this.addBodies([
+            stack,
+            Bodies.rectangle(width / 2, 25 / 2, width, 25, {isStatic: true}),
+            Bodies.rectangle(width / 2, height - (25 / 2), width, 25, {isStatic: true}),
+            Bodies.rectangle(width - (25 / 2), height / 2, 25, height, {isStatic: true}),
+            Bodies.rectangle((25 / 2), height / 2, 25, height, {isStatic: true})
+        ]);
+        /*
+                Events.on(this.render, 'afterRender', function () {
+                    let
+                        // mouse = mouseConstraint.mouse,
+                        context = this.render.context,
+                        bodies = Composite.allBodies(this.engine.world),
+                        startPoint = player.position,//{x: 400, y: 100},
+                        rayDirection = Vector.rotate({x: 1, y: 0}, player.angle),
+                        endPoint = Vector.rotate({x: 1, y: 0}, player.angle);
+
+                    let collisions = [
+                        raycast(bodies, startPoint, rayDirection, 400, (item) => {
+                            return item !== player;
+                        }),
+                        raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), 400, (item) => {
+                            return item !== player;
+                        }),
+                        raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), 400, (item) => {
+                            return item !== player;
+                        }),
+                        raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), 400, (item) => {
+                            return item !== player;
+                        }),
+                        raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 8)), 400, (item) => {
+                            return item !== player;
+                        }),
+                    ];
+
+                    Render.startViewTransform(this.render);
+
+                    collisions.forEach((collision) => {
+                        if (collision.point) {
+                            context.beginPath();
+                            context.moveTo(startPoint.x, startPoint.y);
+                            context.lineTo(collision.point.x, collision.point.y);
+
+                            // console.log('collisions: ', collisions);
+                            context.strokeStyle = '#F88';
+                            context.lineWidth = 0.7;
+                            context.stroke();
+                        }
+                        else {
+                            context.beginPath();
+                            context.moveTo(startPoint.x, startPoint.y);
+                            context.lineTo(collision.ray.x, collision.ray.y);
+                            context.strokeStyle = '#FFF';
+                            context.lineWidth = 0.5;
+                            context.stroke();
+                        }
+                    });
+
+                    context.fillStyle = 'rgba(255,165,0,0.7)';
+                    context.fill();
+
+                    Render.endViewTransform(this.render);
+                });
+        */
+        Render.lookAt(this.render, {
+            min: {x: 0, y: 0},
+            max: {x: width, y: height}
+        });
+
+        return {
+            ...this,
+            engine: this.engine,
+            runner: this.runner,
+            render: this.render,
+            // player: player,
+            canvas: this.render.canvas,
+            stop: () => {
+                Render.stop(this.render);
+                Runner.stop(this.runner);
+            }
+        };
+    }
+
+    addBodies(bodies) {
+        World.add(this.world, bodies);
+    }
+}
+
 function raycast(bodies, start, direction, dist, filterFunc = () => (true)) {
     let normRay = Vector.normalise(direction);
     let ray = normRay;
@@ -25,10 +156,15 @@ function raycast(bodies, start, direction, dist, filterFunc = () => (true)) {
         ray = Vector.add(start, ray);
         let bod = Query.point(bodies.filter(filterFunc), ray)[0];
         if (bod) {
-            return {point: ray, body: bod};
+            return {point: ray, body: bod, ray: ray};
         }
     }
-    return null;
+    return {
+        point: null,
+        body: null,
+        ray: Vector.add(start, Vector.mult(normRay, dist))
+    }
+
 }
 
 function drawPlayer(player, context) {
@@ -42,6 +178,7 @@ function drawPlayer(player, context) {
     context.stroke();
 }
 
+/*
 export default (width, height) => {
     // let player = null;
     // create engine
@@ -95,7 +232,7 @@ export default (width, height) => {
         //     group: 1
         // }
     });
-    Body.rotate(player, Math.PI / 2);
+    player.label = 'Test unit';
     // player.render.strokeStyle = '#FF0000';
     // player.angle = 200;
     World.add(world, [
@@ -110,31 +247,36 @@ export default (width, height) => {
     ]);
 
     Events.on(render, 'afterRender', function () {
-        // Body.setAngle(player, Math.random() * Math.PI / 180);
         let mouse = mouseConstraint.mouse,
             context = render.context,
             bodies = Composite.allBodies(engine.world),
             startPoint = player.position,//{x: 400, y: 100},
-            rayDirection = Vector.rotate({x: 1, y: 0}, player.angle/* * (180 / Math.PI)*/),
-            endPoint = Vector.rotate({x: 1, y: 0}, player.angle /* * (180 / Math.PI)*/);//mouse.position;
-        console.log('endPoint: ', endPoint);
+            rayDirection = Vector.rotate({x: 1, y: 0}, player.angle),
+            endPoint = Vector.rotate({x: 1, y: 0}, player.angle );
 
         let collisions = [
             raycast(bodies, startPoint, rayDirection, 400, (item) => {
                 return item !== player;
-            }), raycast(bodies, startPoint, Vector.rotate(rayDirection, 45), 400, (item) => {
+            }),
+            raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), 400, (item) => {
                 return item !== player;
-            }), raycast(bodies, startPoint, Vector.rotate(rayDirection, -45), 400, (item) => {
+            }),
+            raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), 400, (item) => {
                 return item !== player;
-            })
+            }),
+            raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), 400, (item) => {
+                return item !== player;
+            }),
+            raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 8)), 400, (item) => {
+                return item !== player;
+            }),
         ];
-        console.log('collisions: ', collisions);
         //Query.ray(bodies, startPoint, endPoint);
 
         Render.startViewTransform(render);
 
         collisions.forEach((collision) => {
-            if (collision && collision.point) {
+            if (collision.point) {
                 context.beginPath();
                 context.moveTo(startPoint.x, startPoint.y);
                 context.lineTo(collision.point.x, collision.point.y);
@@ -144,60 +286,20 @@ export default (width, height) => {
                 context.lineWidth = 0.7;
                 context.stroke();
             }
-            // else {
-            //     context.beginPath();
-            //     context.moveTo(startPoint.x, startPoint.y);
-            //     context.lineTo(endPoint.x * 400 + startPoint.x, endPoint.y * 400 + startPoint.y);
-            //     context.strokeStyle = '#FFF';
-            //     context.lineWidth = 0.5;
-            //     context.stroke();
-            // }
+            else {
+                context.beginPath();
+                context.moveTo(startPoint.x, startPoint.y);
+                context.lineTo(collision.ray.x, collision.ray.y);
+                context.strokeStyle = '#FFF';
+                context.lineWidth = 0.5;
+                context.stroke();
+            }
         });
-
-
-        // if (Array.isArray(collisions)) {
-        //     context.beginPath();
-        //     context.moveTo(startPoint.x, startPoint.y);
-        //     context.lineTo(endPoint.x, endPoint.y);
-        //     if (collisions.length > 0) {
-        //         context.strokeStyle = '#fff';
-        //     } else {
-        //         context.strokeStyle = '#555';
-        //     }
-        //     context.lineWidth = 0.5;
-        //     context.stroke();
-        //
-        //     for (let i = 0; i < collisions.length; i++) {
-        //         let collision = collisions[i];
-        //         context.rect(collision.bodyA.position.x - 4.5, collision.bodyA.position.y - 4.5, 8, 8);
-        //     }
-        // }
-        // else {
-        //     if (collisions && collisions.point) {
-        //         context.beginPath();
-        //         context.moveTo(startPoint.x, startPoint.y);
-        //         context.lineTo(collisions.point.x, collisions.point.y);
-        //
-        //         // console.log('collisions: ', collisions);
-        //         context.strokeStyle = '#F88';
-        //         context.lineWidth = 0.7;
-        //         context.stroke();
-        //     }
-        //     else {
-        //         context.beginPath();
-        //         context.moveTo(startPoint.x, startPoint.y);
-        //         context.lineTo(endPoint.x * 400 + startPoint.x, endPoint.y * 400 + startPoint.y);
-        //         context.strokeStyle = '#FFF';
-        //         context.lineWidth = 0.5;
-        //         context.stroke();
-        //     }
-        // }
 
         context.fillStyle = 'rgba(255,165,0,0.7)';
         context.fill();
 
         Render.endViewTransform(render);
-        console.log("player: ", player);
     });
 
     // add mouse control
@@ -236,3 +338,4 @@ export default (width, height) => {
         }
     };
 };
+*/

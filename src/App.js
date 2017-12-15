@@ -17,7 +17,7 @@ import './App.css';
 //     Bodies,
 //     Vector
 // } from 'matter-js';
-import matter from './matter';
+import Matter from './matter';
 
 class App extends Component {
 
@@ -38,18 +38,7 @@ class App extends Component {
         //     this.ctx = this.canvas.getContext('2d');
         //     this.ctx.fillRect(0, 0, this.props.width, this.props.height);
         // }
-        this.matter = matter(this.props.width, this.props.height, {
-            position: {
-                x: 400,
-                y: 100,
-            },
-            radius: 100,
-            direction: {
-                x: 0,
-                y: 0,
-            },
-            rays: 3
-        });
+        this.matter = new Matter(this.props.width, this.props.height);
         console.log('matter: ', this.matter);
         this.player = this.matter.player;
         // console.log("this.player: ", this.player);
