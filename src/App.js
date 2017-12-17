@@ -18,6 +18,7 @@ import './App.css';
 //     Vector
 // } from 'matter-js';
 import Matter from './matter';
+import Player from './Player';
 
 class App extends Component {
 
@@ -40,7 +41,12 @@ class App extends Component {
         // }
         this.matter = new Matter(this.props.width, this.props.height);
         console.log('matter: ', this.matter);
-        this.player = this.matter.player;
+        let units = this.matter.generateUnits(200, 150, 1, 1, 250, 50);
+        console.log('units: ', units);
+        units.bodies.map((unit) => {
+            return new Player(unit, [],this.matter.render);
+        })
+        // this.player = this.matter.player;
         // console.log("this.player: ", this.player);
     }
 
