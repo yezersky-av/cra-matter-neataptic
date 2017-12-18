@@ -22,6 +22,10 @@ export default class Simulation {
         this.world = this.engine.world;
         this.world.gravity = {x: 0, y: 0};
 
+        this.addBodies = this.addBodies.bind(this);
+        this.generateUnits = this.generateUnits.bind(this);
+        this.removeUnits = this.removeUnits.bind(this);
+
         // create renderer
         this.render = Render.create({
             element: document.body,
@@ -39,7 +43,7 @@ export default class Simulation {
         Runner.run(this.runner, this.engine);
 
         // add bodies
-        let stack = Composites.stack(100, 100, 5, 4, 200, 75, function (x, y) {
+        let stack = Composites.stack(100, 20, 4, 8, 250, 75, function (x, y) {
             const swing = 50;
             switch (Math.round(Common.random(0, 1))) {
 
@@ -60,61 +64,106 @@ export default class Simulation {
         });
 
         this.addBodies([
-            stack,
+            //stack,
+            Bodies.rectangle(width / 2, 250, width/2, 50, {isStatic: true}),
+            Bodies.rectangle(width / 2, 400, width/1.4, 25, {isStatic: true}),
+            Bodies.rectangle(200, 250, 50, 300, {isStatic: true}),
+            Bodies.rectangle(width / 3, 700, 25, 600, {isStatic: true}),
+
             Bodies.rectangle(width / 2, 25 / 2, width, 25, {isStatic: true}),
             Bodies.rectangle(width / 2, height - (25 / 2), width, 25, {isStatic: true}),
             Bodies.rectangle(width - (25 / 2), height / 2, 25, height, {isStatic: true}),
             Bodies.rectangle((25 / 2), height / 2, 25, height, {isStatic: true})
         ]);
 
-        Events.on(this.render, 'afterRender', () => {
+        // Events.on(this.engine, 'collisionActive', (...event) => {
+        //     console.log('Player: collision',event);
+        //     //player.body is in e.pair, do stuff with it
+        // });
 
-            let context = this.render.context,
-                render = this.render;
-            Render.startViewTransform(render);
-                context.beginPath();
-                context.moveTo(0, 0);
-                context.lineTo(1000, 1000);
+        Events.on(this.render, 'beforeRender', () => {
+            // console.log('Simulation: beforeRender');
+            let allBodies = [...this.world.bodies];
 
-                context.strokeStyle = '#F88';
-                context.lineWidth = 0.7;
-                context.stroke();
+            this.world.composites.forEach((item) => {
+                return item.bodies.forEach((body) => {
+                    allBodies.push(body);
+                });
+            });
 
-                context.fillStyle = 'rgba(255,165,0,0.7)';
-                context.fill();
-            Render.endViewTransform(render);
-
-            let units = this.world.bodies.filter((body) => {
+            let units = allBodies.filter((body) => {
                 return body.label === 'unit';
             });
 
-            let bodies = this.world.bodies.filter((body) => {
-                return body.label !== 'unit';
+            let bodies = allBodies.filter((body) => {
+                return true;//body.label !== 'unit';
             });
 
+
             units.forEach((unit) => {
+                unit.rayLength = 100;
                 let startPoint = unit.position,
                     rayDirection = Vector.rotate({x: 1, y: 0}, unit.angle);
-
-                let collisions = [
-                    raycast(bodies, startPoint, rayDirection, 400, (item) => {
+                unit.raysCollisions = [
+                    raycast(bodies, startPoint, rayDirection, unit.rayLength * 3, (item) => {
                         return item !== unit;
                     }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), 400, (item) => {
+                    raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), unit.rayLength, (item) => {
                         return item !== unit;
                     }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), 400, (item) => {
+                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), unit.rayLength, (item) => {
                         return item !== unit;
                     }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), 400, (item) => {
-                        return item !== unit;
-                    }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 8)), 400, (item) => {
-                        return item !== unit;
-                    }),
+                    // raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), rayLength, (item) => {
+                    //     return item !== unit;
+                    // }),
+                    // raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 8)), rayLength, (item) => {
+                    //     return item !== unit;
+                    // }),
                 ];
+            });
+
+        });
+
+        Events.on(this.render, 'afterRender', () => {
+
+            let context = this.render.context,
+                allBodies = [...this.world.bodies],
+                render = this.render;
+
+            this.world.composites.forEach((item) => {
+                return item.bodies.forEach((body) => {
+                    allBodies.push(body);
+                });
+            });
+
+            let units = allBodies.filter((body) => {
+                return body.label === 'unit';
+            });
+
+
+            units.forEach((unit) => {
+                let startPoint = unit.position;
+
+                let collisions = unit.raysCollisions;
+
                 Render.startViewTransform(render);
+
+                context.font = "12px Georgia";
+                context.fillStyle = '#FFF';
+                context.fillText(`${unit.score ? unit.score.toFixed(2) : ''}`, startPoint.x, startPoint.y);
+
+                // context.fillStyle = 'rgba(255,165,0,0.7)';
+                // context.fill();
+                Render.endViewTransform(render);
+
                 collisions.forEach((collision) => {
+
+                    Render.startViewTransform(render);
+
+                    context.beginPath();
+                    context.arc(startPoint.x, startPoint.y, 10, 0, 2 * Math.PI);
+                    context.stroke();
 
                     if (collision.point) {
                         context.beginPath();
@@ -136,90 +185,25 @@ export default class Simulation {
                     }
                     context.fillStyle = 'rgba(255,165,0,0.7)';
                     context.fill();
-
-
+                    Render.endViewTransform(render);
                 });
-                Render.endViewTransform(render);
-
             });
-
-
-            // let
-            //     // mouse = mouseConstraint.mouse,
-            //     context = this.render.context,
-            //     bodies = Composite.allBodies(this.engine.world),
-            //     startPoint = player.position,//{x: 400, y: 100},
-            //     rayDirection = Vector.rotate({x: 1, y: 0}, player.angle),
-            //     endPoint = Vector.rotate({x: 1, y: 0}, player.angle);
-            //
-            // let collisions = [
-            //     raycast(bodies, startPoint, rayDirection, 400, (item) => {
-            //         return item !== player;
-            //     }),
-            //     raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), 400, (item) => {
-            //         return item !== player;
-            //     }),
-            //     raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), 400, (item) => {
-            //         return item !== player;
-            //     }),
-            //     raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), 400, (item) => {
-            //         return item !== player;
-            //     }),
-            //     raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 8)), 400, (item) => {
-            //         return item !== player;
-            //     }),
-            // ];
-            //
-            // Render.startViewTransform(this.render);
-            //
-            // collisions.forEach((collision) => {
-            //     if (collision.point) {
-            //         context.beginPath();
-            //         context.moveTo(startPoint.x, startPoint.y);
-            //         context.lineTo(collision.point.x, collision.point.y);
-            //
-            //         // console.log('collisions: ', collisions);
-            //         context.strokeStyle = '#F88';
-            //         context.lineWidth = 0.7;
-            //         context.stroke();
-            //     }
-            //     else {
-            //         context.beginPath();
-            //         context.moveTo(startPoint.x, startPoint.y);
-            //         context.lineTo(collision.ray.x, collision.ray.y);
-            //         context.strokeStyle = '#FFF';
-            //         context.lineWidth = 0.5;
-            //         context.stroke();
-            //     }
-            // });
-            //
-            // context.fillStyle = 'rgba(255,165,0,0.7)';
-            // context.fill();
-            //
-            // Render.endViewTransform(this.render);
         });
 
         Render.lookAt(this.render, {
             min: {x: 0, y: 0},
             max: {x: width, y: height}
         });
-
-        // return {
-        //     this: this,
-        //     engine: this.engine,
-        //     runner: this.runner,
-        //     render: this.render,
-        //     // player: player,
-        //     canvas: this.render.canvas,
-        //     stop: () => {
-        //         Render.stop(this.render);
-        //         Runner.stop(this.runner);
-        //     }
-        // };
     }
 
-    generateUnits(startX, startY, col, row, distance, genereateRadius = 0) {
-        let stack = Composites.stack(startX, startY, row, col, distance, distance, function (x, y) {
+    removeUnits() {
+        Composite.remove(this.world, this.world.bodies.filter((item) => {
+            return item.label === 'unit';
+        }))
+    }
+
+    generateUnits(startX, startY, row, col, distanceX, distanceY, genereateRadius = 0) {
+        let stack = Composites.stack(startX, startY, row, col, distanceX, distanceY, function (x, y) {
             const swing = genereateRadius;
             return Bodies.circle(
                 x + ((Math.random() * swing) - swing / 2),
@@ -227,11 +211,12 @@ export default class Simulation {
                 10,
                 {
                     label: 'unit',
-                    isStatic: false
+                    isStatic: false,// density: 10000, friction: 10000, restitution: 200000, angle: 0
+                    // isSensor: true
                 });
         });
 
-        this.addBodies([stack])
+        this.addBodies([...stack.bodies]);
         return stack;
     }
 
@@ -249,26 +234,15 @@ function raycast(bodies, start, direction, dist, filterFunc = () => (true)) {
         ray = Vector.add(start, ray);
         let bod = Query.point(bodies.filter(filterFunc), ray)[0];
         if (bod) {
-            return {point: ray, body: bod, ray: ray};
+            return {point: ray, body: bod, maxLength: dist, ray: ray};
         }
     }
     return {
         point: null,
         body: null,
+        maxLength: dist,
         ray: Vector.add(start, Vector.mult(normRay, dist))
     }
-
-}
-
-function drawPlayer(player, context) {
-
-    context.beginPath();
-    context.arc(player.position.x, player.position.y, player.radius, 0, 2 * Math.PI, false);
-    context.fillStyle = 'green';
-    context.fill();
-    context.lineWidth = 5;
-    context.strokeStyle = '#003300';
-    context.stroke();
 }
 
 /*
