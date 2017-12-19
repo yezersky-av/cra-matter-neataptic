@@ -32,6 +32,14 @@ class App extends Component {
         this.matter = null;
         this.neat = null;
         this.genoms = null;
+
+        this.startX = 100;
+        this.startY = 100;
+        this.row = 7;
+        this.coll = 4;
+        this.distX = 250;
+        this.distY = 120;
+        this.genereateRadius = 10;
     }
 
     handleOnChange = (event) => {
@@ -45,15 +53,9 @@ class App extends Component {
         // }
         this.matter = new Matter(this.props.width, this.props.height);
         console.log('matter: ', this.matter);
-        const startX = 300;
-        const startY = 150;
-        const row = 5;
-        const coll = 3;
-        const distX = 250;
-        const distY = 120;
-        const genereateRadius = 10;
-        let units = this.matter.generateUnits(startX, startY, coll, row, distX, distY, genereateRadius);
-        this.neat = new Neat(units.length, 3, 4);
+
+        let units = this.matter.generateUnits(this.startX, this.startY, this.coll, this.row, this.distX, this.distY, this.genereateRadius);
+        this.neat = new Neat(units.bodies.length, 3, 4);
         this.genoms = this.neat.getGenome();
 
         units.bodies.map((unit, index) => {
@@ -62,43 +64,21 @@ class App extends Component {
         });
 
         setTimeout(this.evolStep, parseInt(this.state.interval));
-
-        // setInterval(() => {
-        //     this.matter.removeUnits();
-        //     this.genoms = this.neat.endEvaluation(0);
-        //     let units = this.matter.generateUnits(startX, startY, coll, row, distX, distY, genereateRadius);
-        //     let bots = units.bodies.map((unit, index) => {
-        //         Body.setAngle(unit, Math.random() * (Math.PI * 2));
-        //         return new Player(unit, this.genoms[index], {score: 0}, this.matter.render);
-        //     });
-        // }, parseInt(this.state.interval));
-        // let units = this.matter.generateUnits(200, 150, 4, 4, 50, 50);
-        // units.bodies.map((unit,index) => {
-        //     Body.setAngle(unit, Math.random() * (Math.PI * 2));
-        //     return new Player(unit, genoms[index], this.matter.render);
-        // })
     }
 
     evolStep = () => {
-        const startX = 300;
-        const startY = 150;
-        const row = 5;
-        const coll = 3;
-        const distX = 250;
-        const distY = 120;
-        const genereateRadius = 10;
 
         this.matter.removeUnits();
         this.genoms = this.neat.endEvaluation(0);
         console.log('neat: ', this.neat);
 
-        let units = this.matter.generateUnits(startX, startY, coll, row, distX, distY, genereateRadius);
+        let units = this.matter.generateUnits(this.startX, this.startY, this.coll, this.row, this.distX, this.distY, this.genereateRadius);
         let bots = units.bodies.map((unit, index) => {
             Body.setAngle(unit, Math.random() * (Math.PI * 2));
             return new Player(unit, this.genoms[index], {score: 0}, this.matter.render);
         });
         setTimeout(this.evolStep, parseInt(this.state.interval))
-    }
+    };
 
     render() {
         return (

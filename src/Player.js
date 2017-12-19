@@ -48,37 +48,54 @@ export default class Player {
                 //Body.setPosition(this.body.position, Vector.add(this.body.position, forwardMovment));
                 //Body.translate(body, translation)
                 try {
-                    if (normalizedOutput[1] === 1) {
+                    // if (normalizedOutput[1] === 1) {
+                    //     Body.setPosition(this.body, Vector.add(this.body.position, forwardMovment));
+                    // }
+                    // if (normalizedOutput[2] === 1) {
+                    //     Body.setPosition(this.body, Vector.add(this.body.position, backwardMovment));
+                    // }
+                    if (output[1] > output[2]) {
                         Body.setPosition(this.body, Vector.add(this.body.position, forwardMovment));
-                        // this.body.position = Vector.add(this.body.position, forwardMovment);
                     }
-                    if (normalizedOutput[2] === 1) {
-                        Body.setPosition(this.body, Vector.add(this.body.position, backwardMovment));
-                        // this.body.position = Vector.add(this.body.position, backwardMovment);
+                    else if (output[1] < output[2]) {
+                        Body.setPosition(this.body, Vector.add(this.body.position, backwardMovment))
                     }
+                    // if (normalizedOutput[1] === 1) {
+                    //     Body.setPosition(this.body, Vector.add(this.body.position, forwardMovment));
+                    //     // this.body.position = Vector.add(this.body.position, forwardMovment);
+                    // } else
+                    // if (normalizedOutput[2] === 1) {
+                    //     Body.setPosition(this.body, Vector.add(this.body.position, backwardMovment));
+                    //     // this.body.position = Vector.add(this.body.position, backwardMovment);
+                    // }
 
                     if (normalizedOutput[0] === 1) {
-                        Body.setAngle(this.body, this.body.angle - (Math.PI / 8) * output[0]);
-                        // this.body.angle -= Math.PI / 180;
+                        Body.setAngle(this.body, this.body.angle - ((Math.PI / 180) * output[0]));
                     }
                     if (normalizedOutput[3] === 1) {
-                        Body.setAngle(this.body, this.body.angle + (Math.PI / 8) * output[3]);
-                        // this.body.angle += Math.PI / 180;
+                        Body.setAngle(this.body, this.body.angle + ((Math.PI / 180) * output[3]));
                     }
-                    // this.body.positionPrev = this.body.position;
-                    // this.body.anglePrev = this.body.angle;
-                    // this.body.angularVelocity = 0;
-                    // this.body.angularSpeed = 0;
-                    // this.body.inertia = 1;
-                    // this.body.speed = 1;
-                    // this.body.inertia = 99999999;
-                    // this.body.speed = 0;
+                    // if (output[0] > output[3]) {
+                    //     Body.setAngle(this.body, this.body.angle - ((Math.PI / 180) * output[0]));
+                    // } else if (output[0] < output[3]) {
+                    //     Body.setAngle(this.body, this.body.angle + ((Math.PI / 180) * output[3]));
+                    // }
+
                     let deltaVec = Vector.sub(this.positionPrev, this.body.position);
                     let deltaLenght = Math.sqrt(deltaVec.x * deltaVec.x + deltaVec.y * deltaVec.y);
-                    let score = (deltaLenght * normalizedOutput[1] * 1.2) + (deltaLenght * (normalizedOutput[2] * 0.01));
-                    score -= input[0] < 0.003?1.5:0;
-                    score -= normalizedOutput[0] === 1 ?0.01:0;
-                    score -= normalizedOutput[3] === 1 ?0.01:0;
+                    let score = ((deltaLenght * normalizedOutput[1]) * 1.1 ) + (deltaLenght * (normalizedOutput[2] * 0.9));
+                    // score -= input[0] < 0.05 ? 21 : 0;
+                    // score -= input[1] < 0.05 ? 21 : 0;
+                    // score -= input[2] < 0.05 ? 21 : 0;
+
+                    score -= input[0] < 0.1 ? ( this.brain.score > 10 ? this.brain.score * 0.5 : 21) : 0;
+                    score -= input[1] < 0.25 ? ( this.brain.score > 10 ? this.brain.score * 0.5 : 21) : 0;
+                    score -= input[2] < 0.25 ? ( this.brain.score > 10 ? this.brain.score * 0.5 : 21) : 0;
+                    // if(input[0] < 0.005)  score += (deltaLenght * (normalizedOutput[2] * 2.2));
+                    // if(input[1] < 0.005)  score += (deltaLenght * (normalizedOutput[2] * 2.2));
+                    // if(input[2] < 0.005)  score += (deltaLenght * (normalizedOutput[2] * 2.2));
+                    score -= normalizedOutput[0] === 1 ? this.brain.score * 0.5 : 0;
+                    score -= normalizedOutput[3] === 1 ? this.brain.score * 0.5 : 0;
                     this.brain.score += score;
                     if (!isFinite(this.brain.score)) {
                         //console.log('!isFinite');

@@ -65,10 +65,15 @@ export default class Simulation {
 
         this.addBodies([
             //stack,
-            Bodies.rectangle(width / 2, 250, width/2, 50, {isStatic: true}),
-            Bodies.rectangle(width / 2, 400, width/1.4, 25, {isStatic: true}),
-            Bodies.rectangle(200, 250, 50, 300, {isStatic: true}),
-            Bodies.rectangle(width / 3, 700, 25, 600, {isStatic: true}),
+            Bodies.rectangle(width / 2, 300, width / 1.5, 50, {isStatic: true}),
+            Bodies.rectangle(width / 2, 450, width / 1.2, 25, {isStatic: true}),
+            Bodies.rectangle(width - width / 4 + 50, 550, width / 4, 25, {isStatic: true}),
+            Bodies.rectangle(188, 250, 25, 300, {isStatic: true}),
+            Bodies.rectangle(width / 2 - 350, 600, 25, 450, {isStatic: true}),
+            Bodies.rectangle(width / 3 + 20, 700, 25, 350, {isStatic: true}),
+            Bodies.rectangle(width - width / 3 + 288, 613, 25, 350, {isStatic: true}),
+
+            Bodies.rectangle(width / 2 + 150, 700, 100, 100, {isStatic: true}),
 
             Bodies.rectangle(width / 2, 25 / 2, width, 25, {isStatic: true}),
             Bodies.rectangle(width / 2, height - (25 / 2), width, 25, {isStatic: true}),
@@ -183,6 +188,15 @@ export default class Simulation {
                         context.lineWidth = 0.5;
                         context.stroke();
                     }
+
+                    context.beginPath();
+                    context.moveTo(startPoint.x, startPoint.y);
+                    let ray = Vector.mult(Vector.normalise(Vector.sub(collision.ray, startPoint)), collision.maxLength * 0.1);
+                    context.lineTo(startPoint.x + ray.x, startPoint.y + ray.y);
+                    context.strokeStyle = '#FF0';
+                    context.lineWidth = 0.9;
+                    context.stroke();
+
                     context.fillStyle = 'rgba(255,165,0,0.7)';
                     context.fill();
                     Render.endViewTransform(render);
