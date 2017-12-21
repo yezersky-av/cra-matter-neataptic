@@ -10,6 +10,7 @@
     "react-scripts": "1.0.17"
   },
   "scripts": {
+    "git-reset": "git reset --hard HEAD && git clean -df && git pull",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
