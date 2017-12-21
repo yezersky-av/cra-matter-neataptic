@@ -130,6 +130,23 @@ export default class Simulation {
 
         });
 
+        Events.on(this.engine, 'collisionActive', function (event) {
+            event.pairs.forEach((collision) => {
+                if (collision.bodyA.label === 'unit') {
+                    collision.bodyA.collisionCount += 1;
+                }
+                if (collision.bodyB.label === 'unit') {
+                    collision.bodyB.collisionCount += 1;
+                }
+            });
+            //console.log('collisionStart: ', [...event.pairs]);
+            // do something with the pairs that have started collision
+        });
+        // Events.on(this.engine, 'collisionStart', function (event) {
+        //     console.log('collisionStart: ', [...event.pairs]);
+        //     // do something with the pairs that have started collision
+        // });
+
         Events.on(this.render, 'afterRender', () => {
 
             let context = this.render.context,
@@ -155,7 +172,13 @@ export default class Simulation {
                 Render.startViewTransform(render);
 
                 context.font = "12px Georgia";
-                context.fillStyle = '#FFF';
+                if (unit.score > 0) {
+                    context.fillStyle = '#0F0';
+                }
+                else {
+                    context.fillStyle = '#F00';
+                }
+
                 context.fillText(`${unit.score ? unit.score.toFixed(2) : ''}`, startPoint.x, startPoint.y);
 
                 // context.fillStyle = 'rgba(255,165,0,0.7)';
@@ -205,8 +228,8 @@ export default class Simulation {
         });
 
         Render.lookAt(this.render, {
-            min: {x: 0, y: 0},
-            max: {x: width, y: height}
+            min: {x: -100, y: -100},
+            max: {x: width + 100, y: height + 100}
         });
     }
 
@@ -225,6 +248,7 @@ export default class Simulation {
                 10,
                 {
                     label: 'unit',
+                    collisionCount: 0,
                     isStatic: false,// density: 10000, friction: 10000, restitution: 200000, angle: 0
                     // isSensor: true
                 });

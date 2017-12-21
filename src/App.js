@@ -27,7 +27,7 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            interval: 2000
+            interval: 10000
         };
         this.matter = null;
         this.neat = null;
@@ -35,7 +35,7 @@ class App extends Component {
 
         this.startX = 100;
         this.startY = 100;
-        this.row = 7;
+        this.row = 6;
         this.coll = 4;
         this.distX = 250;
         this.distY = 120;

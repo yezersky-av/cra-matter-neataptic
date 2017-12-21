@@ -22,7 +22,7 @@ import * as neataptic from 'neataptic';
 // // GA settings
 // const PLAYER_AMOUNT = Math.round(WIDTH * HEIGHT * 8e-5);
 // const ITERATIONS = 1000;
-const START_HIDDEN_SIZE = 1;
+const START_HIDDEN_SIZE = 3;
 const mutation_RATE = 0.5;
 const ELITISM_PERCENT = 0.1;
 
@@ -44,20 +44,21 @@ export default class Neat {
             // },
             {
                 mutation: [
-                    neataptic.methods.mutation.ADD_NODE,
-                    neataptic.methods.mutation.SUB_NODE,
-                    neataptic.methods.mutation.ADD_CONN,
-                    neataptic.methods.mutation.SUB_CONN,
-                    neataptic.methods.mutation.MOD_WEIGHT,
-                    neataptic.methods.mutation.MOD_BIAS,
-                    neataptic.methods.mutation.MOD_ACTIVATION,
-                    neataptic.methods.mutation.ADD_SELF_CONN,
-                    neataptic.methods.mutation.SUB_SELF_CONN,
-                    neataptic.methods.mutation.ADD_GATE,
-                    neataptic.methods.mutation.SUB_GATE,
-                    neataptic.methods.mutation.ADD_BACK_CONN,
-                    neataptic.methods.mutation.SUB_BACK_CONN,
-                    neataptic.methods.mutation.SWAP_NODES,
+                    neataptic.methods.mutation.ALL,
+                    // neataptic.methods.mutation.ADD_NODE,
+                    // neataptic.methods.mutation.SUB_NODE,
+                    // neataptic.methods.mutation.ADD_CONN,
+                    // neataptic.methods.mutation.SUB_CONN,
+                    // neataptic.methods.mutation.MOD_WEIGHT,
+                    // neataptic.methods.mutation.MOD_BIAS,
+                    // neataptic.methods.mutation.MOD_ACTIVATION,
+                    // neataptic.methods.mutation.ADD_SELF_CONN,
+                    // neataptic.methods.mutation.SUB_SELF_CONN,
+                    // neataptic.methods.mutation.ADD_GATE,
+                    // neataptic.methods.mutation.SUB_GATE,
+                    // neataptic.methods.mutation.ADD_BACK_CONN,
+                    // neataptic.methods.mutation.SUB_BACK_CONN,
+                    // neataptic.methods.mutation.SWAP_NODES,
                 ],
                 popsize: popsize,
                 mutationRate: mutation_RATE,
@@ -103,11 +104,11 @@ export default class Neat {
         });
 
         this.neat.sort();
-        this.populationPool.push({
-            generation: this.neat.generation,
-            score: populationScore / this.neat.population.length,
-            population: [...this.neat.population]
-        });
+        // this.populationPool.push({
+        //     generation: this.neat.generation,
+        //     score: populationScore / this.neat.population.length,
+        //     population: [...this.neat.population]
+        // });
         let newPopulation = [];
 
         // Elitism
