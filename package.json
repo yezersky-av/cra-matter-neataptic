@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bezier-easing": "^2.0.3",
     "matter-js": "^0.14.0",
     "neataptic": "^1.4.7",
     "react": "^16.2.0",

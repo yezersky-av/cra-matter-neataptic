@@ -99,7 +99,7 @@ export default class Simulation {
         });
 
         this.addBodies([
-            stack,
+            //stack,
             /*
              Bodies.rectangle(width / 2, 300, width / 1.5, 50, {isStatic: true}),
              Bodies.rectangle(width / 2, 450, width / 1.2, 25, {isStatic: true}),
