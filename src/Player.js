@@ -24,6 +24,8 @@ export default class Player {
         this.brain.score = 0;
         this.positionPrev = null;
 
+        // this.lastOutput = new Array(4).fill(0);
+
         Events.on(this.render, 'beforeRender', () => {
             if (!this.positionPrev) this.positionPrev = this.body.position;
             // console.log('Player: beforeRender:',this.body.raysCollisions);
@@ -36,12 +38,13 @@ export default class Player {
                     };
                     return ((1 / rayCast.maxLength) * Math.sqrt(ray.x * ray.x + ray.y * ray.y));
                 });
-                let output = this.brain.activate(input);
+                let output = this.brain.activate([...input, this.body.collisionCount > 0 ? 1 : 0]);
                 let normalizedOutput = output.map((item) => {
                     return Math.round(item);
                 });
-                let defForwardMove = Vector.rotate({x: 1, y: 0}, this.body.angle);
-                let defBackwardMove = Vector.rotate({x: 1, y: 0}, this.body.angle);
+                // this.lastOutput = [...normalizedOutput];
+                let defForwardMove = Vector.rotate({x: 3, y: 0}, this.body.angle);
+                let defBackwardMove = Vector.rotate({x: 3, y: 0}, this.body.angle);
                 let forwardMovment = Object.assign({}, defForwardMove);
                 let backwardMovment = Vector.rotate(defBackwardMove, Math.PI);
 
@@ -79,11 +82,11 @@ export default class Player {
 
                     let deltaVec = Vector.sub(this.positionPrev, this.body.position);
                     let deltaLenght = Math.sqrt(deltaVec.x * deltaVec.x + deltaVec.y * deltaVec.y);
-                    let score = ((deltaLenght * normalizedOutput[1]) * 1.01 ) + (deltaLenght * (normalizedOutput[2] * 0.99));
+                    let score = ((deltaLenght * normalizedOutput[1]) * 1.1) + (deltaLenght * (normalizedOutput[2] * 0.9));
 
                     //score += input[0] > 0.5 ? 21 : 0;
 
-                    score += (normalizedOutput[1] === 1 || normalizedOutput[2] === 1 ) && (normalizedOutput[0] === 0 && normalizedOutput[3] === 0 ) ? 150 : 0;
+                    score += (normalizedOutput[1] === 1 || normalizedOutput[2] === 1 ) && (normalizedOutput[0] === 0 && normalizedOutput[3] === 0 ) ? 75 : 0;
 
                     // score -= input[0] < 0.1 ? 30 : 0;
                     // score -= input[1] < 0.1 ? 30 : 0;

@@ -27,19 +27,19 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            interval: 10000
+            interval: 5000
         };
         this.matter = null;
         this.neat = null;
         this.genoms = null;
 
-        this.startX = 100;
+        this.startX = 2400;
         this.startY = 100;
         this.row = 6;
-        this.coll = 4;
-        this.distX = 250;
-        this.distY = 120;
-        this.genereateRadius = 10;
+        this.coll = 6;
+        this.distX = 100;
+        this.distY = 100;
+        this.genereateRadius = 0;
     }
 
     handleOnChange = (event) => {
@@ -55,7 +55,7 @@ class App extends Component {
         console.log('matter: ', this.matter);
 
         let units = this.matter.generateUnits(this.startX, this.startY, this.coll, this.row, this.distX, this.distY, this.genereateRadius);
-        this.neat = new Neat(units.bodies.length, 3, 4);
+        this.neat = new Neat(units.bodies.length, 3 + 1, 4);
         this.genoms = this.neat.getGenome();
 
         units.bodies.map((unit, index) => {

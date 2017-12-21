@@ -21,6 +21,11 @@ export default class Simulation {
         this.engine = Engine.create();
         this.world = this.engine.world;
         this.world.gravity = {x: 0, y: 0};
+        this.center = {
+            x: 2500,
+            y: 450,
+            z: 1
+        };
 
         this.addBodies = this.addBodies.bind(this);
         this.generateUnits = this.generateUnits.bind(this);
@@ -38,25 +43,55 @@ export default class Simulation {
         });
         Render.run(this.render);
 
+        const canvas = this.render.element.getElementsByTagName('canvas')[0];
+        console.log('render.element.mouseover: ', {el: canvas});
+        canvas.onmousemove = (event) => {
+            // console.log('canvas.onmousemove: ', event)
+            if (event.buttons === 1) {
+                this.center.x -= event.movementX * this.center.z;
+                this.center.y -= event.movementY * this.center.z;
+                this.lookAt(this.center);
+            }
+
+        };
+        canvas.onmousewheel = (event) => {
+            // console.log('canvas.onmousewheel: ', event)
+            //if (event.buttons === 1) {
+            this.center.z -= event.wheelDelta !== 0 ? (event.wheelDelta > 0 ? 0.1 : -0.1) : 0;
+            if (this.center.z < 0.1) this.center.z = 0.1;
+            this.lookAt(this.center);
+            //}
+
+        };
+
         // create runner
         this.runner = Runner.create();
         Runner.run(this.runner, this.engine);
 
         // add bodies
-        let stack = Composites.stack(100, 20, 4, 8, 250, 75, function (x, y) {
+        let stack = Composites.stack(-width, -height, 8, 6, 200, 100, function (x, y) {
             const swing = 50;
             switch (Math.round(Common.random(0, 1))) {
 
                 case 0:
                     if (Common.random() < 0.8) {
-                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(20, 50), Common.random(20, 50), {isStatic: true});
+                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(120, 300), Common.random(120, 300), {
+                            angle: Math.random() * (Math.PI * 2),
+                            isStatic: true
+                        });
                     } else {
-                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(80, 120), Common.random(20, 30), {isStatic: true});
+                        return Bodies.rectangle(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), Common.random(160, 480), Common.random(120, 480), {
+                            angle: Math.random() * (Math.PI * 2),
+                            isStatic: true
+                        });
                     }
                 case 1:
                     let sides = Math.round(Common.random(1, 8));
                     sides = (sides === 3) ? 4 : sides;
-                    return Bodies.polygon(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), sides, Common.random(20, 50), {isStatic: true});
+                    return Bodies.polygon(x + ((Math.random() * swing) - swing / 2), y + ((Math.random() * swing) - swing / 2), sides, Common.random(40, 200), {
+                        angle: Math.random() * (Math.PI * 2),
+                        isStatic: true
+                    });
 
                 default:
                     break;
@@ -64,21 +99,68 @@ export default class Simulation {
         });
 
         this.addBodies([
-            //stack,
-            Bodies.rectangle(width / 2, 300, width / 1.5, 50, {isStatic: true}),
-            Bodies.rectangle(width / 2, 450, width / 1.2, 25, {isStatic: true}),
-            Bodies.rectangle(width - width / 4 + 50, 550, width / 4, 25, {isStatic: true}),
-            Bodies.rectangle(188, 250, 25, 300, {isStatic: true}),
-            Bodies.rectangle(width / 2 - 350, 600, 25, 450, {isStatic: true}),
-            Bodies.rectangle(width / 3 + 20, 700, 25, 350, {isStatic: true}),
-            Bodies.rectangle(width - width / 3 + 288, 613, 25, 350, {isStatic: true}),
+            stack,
+            /*
+             Bodies.rectangle(width / 2, 300, width / 1.5, 50, {isStatic: true}),
+             Bodies.rectangle(width / 2, 450, width / 1.2, 25, {isStatic: true}),
+             Bodies.rectangle(width - width / 4 + 50, 550, width / 4, 25, {isStatic: true}),
+             Bodies.rectangle(188, 250, 25, 300, {isStatic: true}),
+             Bodies.rectangle(width / 2 - 350, 600, 25, 450, {isStatic: true}),
+             Bodies.rectangle(width / 3 + 20, 700, 25, 350, {isStatic: true}),
+             Bodies.rectangle(width - width / 3 + 288, 613, 25, 350, {isStatic: true}),
 
-            Bodies.rectangle(width / 2 + 150, 700, 100, 100, {isStatic: true}),
+             Bodies.rectangle(width / 2 + 150, 700, 100, 100, {isStatic: true}),
+             */
+            /**x, y, width, height, options**/
+            Bodies.rectangle(0, -height, width * 2, 25, {isStatic: true}), //up
+            Bodies.rectangle(0, height * 2, width * 2, 25, {isStatic: true}), //down
 
-            Bodies.rectangle(width / 2, 25 / 2, width, 25, {isStatic: true}),
-            Bodies.rectangle(width / 2, height - (25 / 2), width, 25, {isStatic: true}),
-            Bodies.rectangle(width - (25 / 2), height / 2, 25, height, {isStatic: true}),
-            Bodies.rectangle((25 / 2), height / 2, 25, height, {isStatic: true})
+            Bodies.rectangle(-width, height / 2, 25, height * 3, {isStatic: true}), //left
+            Bodies.rectangle(width, height / 2 + height, 25, height, {isStatic: true}), //right 1
+            Bodies.rectangle(width, height / 2 - height, 25, height, {isStatic: true}), //right 2
+            Bodies.rectangle(width + width, height / 2, 25, height, {isStatic: true}), //right 3
+            // Bodies.rectangle(width, height / 2, 25, height, {isStatic: true}), //right 3
+            Bodies.rectangle(width + width / 2, (height / 2) - (height / 2), width, 25, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2, (height / 2) + (height / 2), width, 25, {isStatic: true}), //down
+
+            /* */
+            Bodies.rectangle(width + width / 2, (height / 2) - (height / 2) + 400, width / 2, 25, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 - 500, (height / 2) - (height / 2) + 175, width / 3.5, 25, {
+                angle: -Math.PI / 4,
+                isStatic: true
+            }), //down
+            Bodies.rectangle(width + width / 2 - 700, (height / 2) - (height / 2) + 220, width / 5, 25, {
+                angle: -Math.PI / 4,
+                isStatic: true
+            }), //down
+            Bodies.rectangle(width + width / 2 - 550, (height / 2) - (height / 2) + 720, width / 3, 25, {
+                angle: Math.PI / 4,
+                isStatic: true
+            }), //down
+
+            Bodies.rectangle(width + width / 2, (height / 2) - (height / 2) + 175, width / 3.5, 25, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 - 50, (height / 2) - (height / 2) + 400, 25, width / 3, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 - 550, (height / 2) - (height / 2) + 770, width / 3, 25, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 770, width / 8, width / 8, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 150, width / 9, width / 9, {
+                angle: Math.PI / 4,
+                isStatic: true
+            }), //down
+
+            /* крест */
+            Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 400, 25, width / 3, {
+                angle: Math.PI / 4,
+                isStatic: true
+            }), //down
+            Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 400, 25, width / 3, {
+                angle: -Math.PI / 4,
+                isStatic: true
+            }), //down
+            /* */
+
+            Bodies.rectangle(width + width / 2 - 850, (height / 2) - (height / 2) + 400, 25, width / 2.7, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 520, width / 2, 25, {isStatic: true}), //down
+
         ]);
 
         // Events.on(this.engine, 'collisionActive', (...event) => {
@@ -116,7 +198,7 @@ export default class Simulation {
                     raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), unit.rayLength, (item) => {
                         return item !== unit;
                     }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), unit.rayLength, (item) => {
+                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), unit.rayLength , (item) => {
                         return item !== unit;
                     }),
                     // raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), rayLength, (item) => {
@@ -169,22 +251,6 @@ export default class Simulation {
 
                 let collisions = unit.raysCollisions;
 
-                Render.startViewTransform(render);
-
-                context.font = "12px Georgia";
-                if (unit.score > 0) {
-                    context.fillStyle = '#0F0';
-                }
-                else {
-                    context.fillStyle = '#F00';
-                }
-
-                context.fillText(`${unit.score ? unit.score.toFixed(2) : ''}`, startPoint.x, startPoint.y);
-
-                // context.fillStyle = 'rgba(255,165,0,0.7)';
-                // context.fill();
-                Render.endViewTransform(render);
-
                 collisions.forEach((collision) => {
 
                     Render.startViewTransform(render);
@@ -222,14 +288,35 @@ export default class Simulation {
 
                     context.fillStyle = 'rgba(255,165,0,0.7)';
                     context.fill();
+
+                    Render.endViewTransform(render);
+
+                    Render.startViewTransform(render);
+
+                    context.font = "12px Georgia";
+                    if (unit.score > 0) {
+                        context.fillStyle = '#0F0';
+                    }
+                    else {
+                        context.fillStyle = '#F00';
+                    }
+
+                    context.fillText(`${unit.score ? unit.score.toFixed(2) : ''}`, startPoint.x, startPoint.y);
+
+                    // context.fillStyle = 'rgba(255,165,0,0.7)';
+                    // context.fill();
                     Render.endViewTransform(render);
                 });
             });
         });
 
+        this.lookAt(this.center)
+    }
+
+    lookAt(camera) {
         Render.lookAt(this.render, {
-            min: {x: -100, y: -100},
-            max: {x: width + 100, y: height + 100}
+            min: {x: camera.x - (600 * camera.z), y: camera.y - (450 * camera.z)},
+            max: {x: camera.x + (600 * camera.z), y: camera.y + (450 * camera.z)}
         });
     }
 
