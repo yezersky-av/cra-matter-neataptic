@@ -23,7 +23,7 @@ import * as neataptic from 'neataptic';
 // const PLAYER_AMOUNT = Math.round(WIDTH * HEIGHT * 8e-5);
 // const ITERATIONS = 1000;
 const START_HIDDEN_SIZE = 3;
-const mutation_RATE = 0.5;
+const mutation_RATE = 0.3;
 const ELITISM_PERCENT = 0.1;
 
 // Trained population

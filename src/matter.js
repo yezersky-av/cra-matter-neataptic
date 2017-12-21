@@ -139,7 +139,7 @@ export default class Simulation {
             }), //down
 
             Bodies.rectangle(width + width / 2, (height / 2) - (height / 2) + 175, width / 3.5, 25, {isStatic: true}), //down
-            Bodies.rectangle(width + width / 2 - 50, (height / 2) - (height / 2) + 400, 25, width / 3, {isStatic: true}), //down
+            Bodies.rectangle(width + width / 2 - 50, (height / 2) - (height / 2) + 500, 25, width / 4, {isStatic: true}), //down
             Bodies.rectangle(width + width / 2 - 550, (height / 2) - (height / 2) + 770, width / 3, 25, {isStatic: true}), //down
             Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 770, width / 8, width / 8, {isStatic: true}), //down
             Bodies.rectangle(width + width / 2 + 600, (height / 2) - (height / 2) + 150, width / 9, width / 9, {

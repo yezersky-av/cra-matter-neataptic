@@ -16,8 +16,9 @@ import {
 } from 'matter-js';
 
 import bezier from 'bezier-easing';
+import clamp from 'clamp';
 
-const bezierFunc = bezier(.61, .01, .44, .96);
+const bezierFunc = bezier(.61,.01,.05,.99);
 
 export default class Player {
     constructor(body, genome, populationData, render) {
@@ -48,8 +49,9 @@ export default class Player {
                     return Math.round(item);
                 });
                 // this.lastOutput = [...normalizedOutput];
-                let defForwardMove = Vector.rotate({x: 3, y: 0}, this.body.angle);
-                let defBackwardMove = Vector.rotate({x: 3, y: 0}, this.body.angle);
+                let defForwardMove = Vector.rotate({x: 3 * clamp(output[1], 0, 1), y: 0}, this.body.angle);
+                let defBackwardMove = Vector.rotate({x: 3 * clamp(output[2], 0, 1), y: 0}, this.body.angle);
+                //
                 let forwardMovment = Object.assign({}, defForwardMove);
                 let backwardMovment = Vector.rotate(defBackwardMove, Math.PI);
 
@@ -124,6 +126,7 @@ export default class Player {
                     // score -= normalizedOutput[0] === 1 ? this.brain.score * 0.5 : 0;
                     // score -= normalizedOutput[3] === 1 ? this.brain.score * 0.5 : 0;
                     this.brain.score += score;
+                    if (this.brain.score < -2000) this.brain.score = -2000;
                     if (!isFinite(this.brain.score)) {
                         //console.log('!isFinite');
                         this.brain.score = 0;
