@@ -22,7 +22,7 @@ import * as neataptic from 'neataptic';
 // // GA settings
 // const PLAYER_AMOUNT = Math.round(WIDTH * HEIGHT * 8e-5);
 // const ITERATIONS = 1000;
-const START_HIDDEN_SIZE = 3;
+const START_HIDDEN_SIZE = 20;
 const mutation_RATE = 0.3;
 const ELITISM_PERCENT = 0.1;
 
@@ -86,6 +86,7 @@ export default class Neat {
         this.getGeneration = this.getGeneration.bind(this);
         this.setPopulation = this.setPopulation.bind(this);
         this.endEvaluation = this.endEvaluation.bind(this);
+        this.getPopulationPool = this.getPopulationPool.bind(this);
         this.getCurentPopulationAvarageScore = this.getCurentPopulationAvarageScore.bind(this);
     }
 
@@ -115,16 +116,12 @@ export default class Neat {
         return populationScore / this.neat.population.length;
     }
 
+    getPopulationPool() {
+        return this.populationPool;
+    }
+
     endEvaluation() {
-        // let populationScore = 0;
-        // this.neat.population.forEach((item) => {
-        //     if (item.score) {
-        //         populationScore += item.score;
-        //     }
-        // });
-
         console.log('Generation:', this.neat.generation, ' population Avarage Score: ', this.getCurentPopulationAvarageScore());
-
 
         this.neat.sort();
         let newPopulation = [];
@@ -133,6 +130,17 @@ export default class Neat {
         for (let i = 0; i < this.neat.elitism; i++) {
             newPopulation.push(this.neat.population[i]);
         }
+
+        this.populationPool = [{
+            key: Date.now(),
+            generation: this.neat.generation,
+            score: this.getCurentPopulationAvarageScore(),
+            population: JSON.parse(JSON.stringify(this.neat.population)),
+            favorite: false
+        }, ...this.populationPool].filter((item, index) => {
+            return index < 20;
+        });
+
 
         // Breed the next individuals
         for (let i = 0; i < this.neat.popsize - this.neat.elitism; i++) {

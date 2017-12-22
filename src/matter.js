@@ -183,6 +183,7 @@ export default class Simulation {
             });
 
             let bodies = allBodies.filter((body) => {
+
                 return true;//body.label !== 'unit';
             });
 
@@ -198,7 +199,7 @@ export default class Simulation {
                     raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 4), unit.rayLength, (item) => {
                         return item !== unit;
                     }),
-                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), unit.rayLength , (item) => {
+                    raycast(bodies, startPoint, Vector.rotate(rayDirection, -(Math.PI / 4)), unit.rayLength, (item) => {
                         return item !== unit;
                     }),
                     // raycast(bodies, startPoint, Vector.rotate(rayDirection, Math.PI / 8), rayLength, (item) => {
@@ -353,15 +354,21 @@ export default class Simulation {
 function raycast(bodies, start, direction, dist, filterFunc = () => (true)) {
     let normRay = Vector.normalise(direction);
     let ray = normRay;
-    // let point = Vector.add(ray, start);
-    for (let i = 0; i < dist; i++) {
-        ray = Vector.mult(normRay, i);
-        ray = Vector.add(start, ray);
-        let bod = Query.point(bodies.filter(filterFunc), ray)[0];
-        if (bod) {
-            return {point: ray, body: bod, maxLength: dist, ray: ray};
+    let collisions = Query.ray(bodies, start, Vector.add(start, Vector.mult(normRay, dist)));
+    // console.log('raycast: collisions: ', collisions);
+    if (collisions.length) {
+        // console.log('nearestLength: ', nearestLength);
+        for (let i = 0; i < dist; i++) {
+            ray = Vector.mult(normRay, i);
+            ray = Vector.add(start, ray);
+            let bod = Query.point(bodies.filter(filterFunc), ray)[0];
+            if (bod) {
+                return {point: ray, body: bod, maxLength: dist, ray: ray};
+            }
         }
     }
+    // let point = Vector.add(ray, start);
+
     return {
         point: null,
         body: null,

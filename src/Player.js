@@ -63,11 +63,11 @@ export default class Player {
                     } else if (normalizedOutput[0] === 0 && normalizedOutput[3] === 1) {
                         Body.setAngle(this.body, this.body.angle + ((Math.PI / 180) * (output[3] * 5)));
                     } else if (normalizedOutput[1] === 1 && normalizedOutput[2] === 1) {
-                        //if (output[0] > output[3])
+                        if (output[0] > output[3])
                         {
                             Body.setAngle(this.body, this.body.angle - ((Math.PI / 180) * output[0]));
                         }
-                        //else if (output[0] < output[3])
+                        else if (output[0] < output[3])
                         {
                             Body.setAngle(this.body, this.body.angle + ((Math.PI / 180) * output[3]));
                         }

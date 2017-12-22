@@ -5,6 +5,7 @@
   "dependencies": {
     "bezier-easing": "^2.0.3",
     "clamp": "^1.0.1",
+    "material-ui": "^0.20.0",
     "matter-js": "^0.14.0",
     "neataptic": "^1.4.7",
     "react": "^16.2.0",
